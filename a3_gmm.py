@@ -3,7 +3,7 @@ import numpy as np
 import os, fnmatch
 import random
 
-######## CHECK THIS PLS ????????
+######## CHECK THIS ?????
 dataDir = '/u/cs401/A3/data/'
 # dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
 

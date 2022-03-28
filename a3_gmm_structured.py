@@ -2,6 +2,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import os, fnmatch
 import random
+from scipy.special import logsumexp
 
 ################################# ??????????????????????????????????
 ################################# ??????????????????????????????????
@@ -10,6 +11,10 @@ import random
 ################################# ??????????????????????????????????
 ################################# ??????????????????????????????????
 #### ??????????????????????? ##### ^^^^^^ *********  CHANGE THIS PLS
+
+random.seed(3)
+np.random.seed(3)
+
 # dataDir = '/u/cs401/A3/data/'
 dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
 
@@ -33,7 +38,12 @@ class theta:
         This should output a float or equivalent (array of size [1] etc.)
         NOTE: use this in `log_b_m_x` below
         """
-        print("TODO")
+        # based on slide 32 of tutorial A3
+        part1 = np.sum((self.mu[m] ** 2) / (self.Sigma[m] * 2))
+        part2 = (self._d / 2) * np.log(2 * np.pi)
+        part3 = np.sum(np.log(self.Sigma[m])) / 2
+
+        return part1 + part2 + part3
 
     def reset_omega(self, omega):
         """Pass in `omega` of shape [M, 1] or [M]
@@ -75,7 +85,23 @@ def log_b_m_x(m, x, myTheta):
     But we encourage you to use the vectorized version in your `train`
     function for faster/efficient computation.
     """
-    print("TODO")
+    # print("*** in log_b_m_x")
+    # print("x shape ", x.shape)
+
+    # based on slide 32 of tutorial A3
+    part1 = (x ** 2) / (myTheta.Sigma[m] * 2)
+    part2 = myTheta.mu[m] * x / myTheta.Sigma[m]
+
+    # for both single row and vectorized cases
+    a = 1
+    if len(x.shape) == 1:
+        a = 0
+
+    # print("%%%  cont part  ", myTheta.precomputedForM(m))
+    l_b_m_x = -np.sum((part1 - part2), axis=a) - myTheta.precomputedForM(m)
+    # print("log_b_m_x shape ", l_b_m_x.shape)
+    return l_b_m_x
+
 
 
 def log_p_m_x(log_Bs, myTheta):
@@ -91,7 +117,24 @@ def log_p_m_x(log_Bs, myTheta):
 
     NOTE: For a description of `log_Bs`, refer to the docstring of `logLik` below
     """
-    print("TODO")
+    # print("******************************* in log_p_m_x")
+    # print("log_Bs shape ", log_Bs.shape)
+    # print("^^^^^^ log_BS  ", log_Bs)
+
+    w_and_b = np.log(myTheta.omega) + log_Bs
+    # print("w_and_b shape ", w_and_b.shape)
+
+    denominator = LogsumExpTrick(w_and_b)
+    # print("denominator shape ", denominator.shape)
+
+    l_p_m_x = w_and_b - denominator
+    # print("l_p_m_x shape ", l_p_m_x.shape)
+    #
+    # print("w_and_b  ", w_and_b)
+    # print("denominator   ", denominator)
+    # print("sunstract  ", l_p_m_x)
+
+    return l_p_m_x
 
 
 def logLik(log_Bs, myTheta):
@@ -102,24 +145,98 @@ def logLik(log_Bs, myTheta):
 
         We don't actually pass X directly to the function because we instead pass:
 
-        log_Bs(m,t) is the log probability of vector x_t in component m, which is computed and stored outside of this function for efficiency.
+        log_Bs(m,t) is the log probability of vector x_t in component m,
+        which is computed and stored outside of this function for efficiency.
 
         See equation 3 of the handout
     """
-    print("TODO")
+    # print("*** in logLin")
+    w_and_b = np.log(myTheta.omega) + log_Bs
+    l_lik = np.sum(LogsumExpTrick(w_and_b))
+    # print("l_lik  ", l_lik)
+    return l_lik
+
+
+
+
+def LogsumExpTrick(x):
+    # to solve overflow issues, used The Log-Sum-Exp Trick based on this link:
+    # https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/ and
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.logsumexp.html
+
+    c = np.max(x, axis=0, keepdims=True)
+    return c + logsumexp(x - c, axis=0, keepdims=True)
 
 
 def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
     """ Train a model for the given speaker. Returns the theta (omega, mu, sigma)"""
-    myTheta = theta(speaker, M, X.shape[1])
-    # perform initialization (Slide 32)
-    print("TODO : Initialization")
-    # for ex.,
-    # myTheta.reset_omega(omegas_with_constraints)
-    # myTheta.reset_mu(mu_computed_using_data)
-    # myTheta.reset_Sigma(some_appropriate_sigma)
 
-    print("TODO: Rest of training")
+    #### ????? should we make train also work for X: d and X: Txd ?????
+
+    T = X.shape[0]
+    # print("---- NOW in train")
+    # print("X shape ", X.shape)
+    myTheta = theta(speaker, M, X.shape[1])
+    # print("my Theta name ", myTheta.name)
+    # print("my Theta.mu ", myTheta.mu.shape)
+    # print("my Theta.omega ", myTheta.omega.shape)
+    # print("my Theta.sigma ", myTheta.Sigma.shape)
+
+    # perform initialization (Slide 32)
+    ### ???? should it be k-means ?????? for now just random thingy
+
+    # initializing data based on slide 28 of tutorial A3
+    # for omega, it should be 0<= omega <=1 and the sum should be 1 => 1/m for each
+    init_omega = np.ones((M, 1)) / M
+    myTheta.reset_omega(init_omega)
+
+    # for mu, it is initialized to a random vector from data
+    init_mu = X[np.random.randint(0, T, M)]
+    myTheta.reset_mu(init_mu)
+
+    # for sigma, it is initialized to identity matrix
+    init_sigma = np.ones((M, myTheta._d))
+    myTheta.reset_Sigma(init_sigma)
+
+    # training based on Algorithm 1 in handout, page 9
+    i = 0
+    prev_L = -np.inf
+    improvement = np.inf
+    while i <= maxIter and improvement >= epsilon:
+        ### compute intermediate results
+        print("^^^^^ in train main loop i->", i)
+        log_Bs = []
+        for m in range(M):
+            log_Bs.append(log_b_m_x(m, X, myTheta))
+
+        log_Probs = log_p_m_x(np.array(log_Bs), myTheta)
+
+        ### compute likelihood
+        L = logLik(np.array(log_Bs), myTheta)
+
+        ### Update parameters
+        # print("&&& log_probs   ", log_Probs)
+        lik = np.exp(log_Probs)
+        denominator_lik = np.sum(lik, axis = 1, keepdims = True)
+
+        # update omega
+        new_omega = np.sum(lik, axis=1) / T
+        # print("new omega ", new_omega, " sum  ", np.sum(new_omega))
+        myTheta.reset_omega(new_omega)
+        # update mu
+        new_mu = (lik @ X) / denominator_lik
+        # print("new mu ", new_mu)
+        myTheta.reset_mu(new_mu)
+        # update sigma
+        new_sigma = ((lik @ (X ** 2)) / denominator_lik) - (myTheta.mu ** 2)
+        # print("new sigma  ", new_sigma)
+        myTheta.reset_Sigma(new_sigma)
+
+        improvement = L - prev_L
+        prev_L = L
+        i += 1
+
+        print(f"Iteration {i} likelihood of {round(prev_L, 4)} and dif of {round(improvement, 4)}")
 
     return myTheta
 
@@ -138,7 +255,14 @@ def test(mfcc, correctID, models, k=5):
         the format of the log likelihood (number of decimal places, or exponent) does not matter
     """
     bestModel = -1
-    print("TODO")
+    print(" ^^^^ in test ")
+    print(mfcc)
+    print(mfcc.shape)
+    print("correctID  ", correctID)
+    print("models ", models)
+    print("models shapr ", len(models))
+
+    
 
     return 1 if (bestModel == correctID) else 0
 
@@ -148,6 +272,7 @@ if __name__ == "__main__":
     trainThetas = []
     testMFCCs = []
     print("TODO: you will need to modify this main block for Sec 2.3")
+    print("ME: still don't know what 2.3 wants. skipped")
     d = 13
     k = 5  # number of top speakers to display, <= 0 if none
     M = 8
@@ -171,8 +296,10 @@ if __name__ == "__main__":
                 myMFCC = np.load(os.path.join(dataDir, speaker, file))
                 X = np.append(X, myMFCC, axis=0)
 
+            # X is Txd or d ???
             trainThetas.append(train(speaker, X, M, epsilon, maxIter))
-
+            break
+        break
     # evaluate
     numCorrect = 0
 
