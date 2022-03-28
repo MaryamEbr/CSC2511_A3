@@ -11,9 +11,7 @@ from scipy.special import logsumexp
 ################################# ??????????????????????????????????
 ################################# ??????????????????????????????????
 #### ??????????????????????? ##### ^^^^^^ *********  CHANGE THIS PLS
-
-random.seed(3)
-np.random.seed(3)
+np.random.seed(77)
 
 # dataDir = '/u/cs401/A3/data/'
 dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
@@ -103,7 +101,6 @@ def log_b_m_x(m, x, myTheta):
     return l_b_m_x
 
 
-
 def log_p_m_x(log_Bs, myTheta):
     """ Returns the matrix of log probabilities i.e. log of p(m|X;theta)
 
@@ -157,8 +154,6 @@ def logLik(log_Bs, myTheta):
     return l_lik
 
 
-
-
 def LogsumExpTrick(x):
     # to solve overflow issues, used The Log-Sum-Exp Trick based on this link:
     # https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/ and
@@ -202,9 +197,11 @@ def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
     i = 0
     prev_L = -np.inf
     improvement = np.inf
+    print("--------------------------------- Train ---------------------------------")
+    print("For speaker: ", myTheta.name)
     while i <= maxIter and improvement >= epsilon:
         ### compute intermediate results
-        print("^^^^^ in train main loop i->", i)
+
         log_Bs = []
         for m in range(M):
             log_Bs.append(log_b_m_x(m, X, myTheta))
@@ -217,7 +214,7 @@ def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
         ### Update parameters
         # print("&&& log_probs   ", log_Probs)
         lik = np.exp(log_Probs)
-        denominator_lik = np.sum(lik, axis = 1, keepdims = True)
+        denominator_lik = np.sum(lik, axis=1, keepdims=True)
 
         # update omega
         new_omega = np.sum(lik, axis=1) / T
@@ -236,7 +233,7 @@ def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
         prev_L = L
         i += 1
 
-        print(f"Iteration {i} likelihood of {round(prev_L, 4)} and dif of {round(improvement, 4)}")
+        print("Iteration: ", i, "  L: ", L, "  Improvement: ", improvement)
 
     return myTheta
 
@@ -255,14 +252,38 @@ def test(mfcc, correctID, models, k=5):
         the format of the log likelihood (number of decimal places, or exponent) does not matter
     """
     bestModel = -1
-    print(" ^^^^ in test ")
-    print(mfcc)
-    print(mfcc.shape)
-    print("correctID  ", correctID)
-    print("models ", models)
-    print("models shapr ", len(models))
+    # print(" ^^^^ in test ")
+    # print("correctID  ", correctID)
+    # print("models sth ", models[0].name)
 
-    
+    counter = 0
+    lik_id_list = []
+    for model in models:
+
+        ### compute log_Bs
+        log_Bs = []
+        for m in range(M):
+            log_Bs.append(log_b_m_x(m, mfcc, model))
+
+        ### compute likelihood
+        L = logLik(np.array(log_Bs), model)
+        lik_id_list.append((L, counter))
+
+        counter += 1
+
+    ### sort lik_id_list based on likelihood
+    lik_id_list.sort(key=lambda tup: tup[0], reverse=True)
+    # print("after sort ", lik_id_list)
+
+    bestModel = lik_id_list[0][1]
+
+
+    if k > 0:
+        print(models[correctID].name)
+        for i in range(k):
+            print(models[lik_id_list[i][1]].name , " ", lik_id_list[i][0])
+        print("")
+
 
     return 1 if (bestModel == correctID) else 0
 
@@ -272,17 +293,20 @@ if __name__ == "__main__":
     trainThetas = []
     testMFCCs = []
     print("TODO: you will need to modify this main block for Sec 2.3")
-    print("ME: still don't know what 2.3 wants. skipped")
+    #### ????? why??? I didn't change anything for sec2.3 ???? did you mean 2.4 ???
+    #### Default ones
     d = 13
     k = 5  # number of top speakers to display, <= 0 if none
-    M = 8
+    # M = 8
+    # epsilon = 0.0
+    # maxIter = 20
+
+    M = 1
     epsilon = 0.0
     maxIter = 20
     # train a model for each speaker, and reserve data for testing
-
     for subdir, dirs, files in os.walk(dataDir):
         for speaker in dirs:
-            print(speaker)
 
             files = fnmatch.filter(os.listdir(os.path.join(dataDir, speaker)), "*npy")
             random.shuffle(files)
@@ -296,13 +320,15 @@ if __name__ == "__main__":
                 myMFCC = np.load(os.path.join(dataDir, speaker, file))
                 X = np.append(X, myMFCC, axis=0)
 
-            # X is Txd or d ???
             trainThetas.append(train(speaker, X, M, epsilon, maxIter))
-            break
-        break
+
     # evaluate
+    print("--------------------------------- Test ---------------------------------")
     numCorrect = 0
 
     for i in range(0, len(testMFCCs)):
         numCorrect += test(testMFCCs[i], i, trainThetas, k)
     accuracy = 1.0 * numCorrect / len(testMFCCs)
+
+    print("Train Configuration: ", "M ", M, " maxIter ", maxIter, " epsilon ", epsilon, " d ", d)
+    print("*** Test Accuracy:  ", accuracy)
