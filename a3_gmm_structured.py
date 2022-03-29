@@ -11,7 +11,7 @@ from scipy.special import logsumexp
 ################################# ??????????????????????????????????
 ################################# ??????????????????????????????????
 #### ??????????????????????? ##### ^^^^^^ *********  CHANGE THIS PLS
-np.random.seed(77)
+# np.random.seed(77)
 
 # dataDir = '/u/cs401/A3/data/'
 dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
@@ -297,16 +297,19 @@ if __name__ == "__main__":
     #### Default ones
     d = 13
     k = 5  # number of top speakers to display, <= 0 if none
-    # M = 8
-    # epsilon = 0.0
-    # maxIter = 20
-
-    M = 1
+    M = 8
     epsilon = 0.0
     maxIter = 20
+
+    # num_Speaker = 5
+    # speaker_count = 0
     # train a model for each speaker, and reserve data for testing
     for subdir, dirs, files in os.walk(dataDir):
         for speaker in dirs:
+            ### for part 2.4, different number of speakers
+            # if speaker_count > num_Speaker:
+            #     break
+            # speaker_count += 1
 
             files = fnmatch.filter(os.listdir(os.path.join(dataDir, speaker)), "*npy")
             random.shuffle(files)
@@ -320,15 +323,22 @@ if __name__ == "__main__":
                 myMFCC = np.load(os.path.join(dataDir, speaker, file))
                 X = np.append(X, myMFCC, axis=0)
 
+
+            ### for 2.4, reducing the X rows for training
+            # X = X[:int(X.shape[0]/10),:]
+
             trainThetas.append(train(speaker, X, M, epsilon, maxIter))
 
     # evaluate
     print("--------------------------------- Test ---------------------------------")
     numCorrect = 0
 
+    print("length of test ", len(testMFCCs))
+
     for i in range(0, len(testMFCCs)):
+        print("for each test  ", testMFCCs[i].shape)
         numCorrect += test(testMFCCs[i], i, trainThetas, k)
     accuracy = 1.0 * numCorrect / len(testMFCCs)
 
-    print("Train Configuration: ", "M ", M, " maxIter ", maxIter, " epsilon ", epsilon, " d ", d)
+    # print("Train Configuration: ", "M ", M, " maxIter ", maxIter, " epsilon ", epsilon, " d ", d)
     print("*** Test Accuracy:  ", accuracy)
