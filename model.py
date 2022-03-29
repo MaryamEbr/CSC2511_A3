@@ -18,7 +18,7 @@ class LieDetector(nn.Module):
         self.hidden_size = hidden_size
 
         # TODO: Create a uni-directional GRU with 1 hidden layer for truth-lie classification
-        self.gru = nn.GRU(input_size=input_size, hidden_size=self.hidden_size, bidirectional=False)
+        self.gru = nn.GRU(input_size=input_size, hidden_size=self.hidden_size, bidirectional=False, num_layers = 1)
         # TODO: After running the data through the GRU, perform an affine projection of the hidden space to 2D
         # TODO: space for classification (0 - truth or 1 - lie)
         self.classifier = nn.Linear(in_features=hidden_size, out_features=2)
