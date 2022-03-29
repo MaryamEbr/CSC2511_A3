@@ -1,0 +1,99 @@
+*** Changing M
+M=1, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 0.96875
+M=2, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 0.96875
+M=4, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 0.96875
+M=8, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=10, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=20, maxIter=30, epsilon=0, S=32 -> Test Accuracy: 1.0
+
+The accuracy is slightly lower for M<8. This shows that for this data, a Russian model with 2 or 4 component cannot
+capture all the features and learn a good model. However, after M=8 the accuracies are all 1 and there's no more
+improvement. The reason is that the sata is not so much complicated to need this amount of parameters for a good model.
+It seems that M=8 is a good choice, so I keep it this way for other experiments.
+
+
+*** Changing maxItr
+M=8, maxIter=1, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=5, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=10, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=50, epsilon=0, S=32 -> Test Accuracy: 1.0
+
+It seems with the default configuration the maxItr doesn't affect the accuracy much and even with one iteration
+after updating the parameters for the first time, with M=8 and epsilon=0.0 the model is good enough to classify the test samples
+with great accuracy.
+
+
+*** Changing epsilon
+M=8, maxIter=20, epsilon=0.0001, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0.1, S=32 -> Test Accuracy: 0.96875
+M=8, maxIter=20, epsilon=1, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=10, S=32 -> Test Accuracy: 1.0
+M=8, maxIter=50, epsilon=100, S=32 -> Test Accuracy: 1.0
+
+
+The epsilon too seems doen't affect the aacuracy of classifier that much. But still smaller epsilons are better.
+Larger epsilons don't let the model improvement to reach a perfect level in learning process.
+
+
+*** Changing the number of speakers
+M=8, maxIter=20, epsilon=0, S=10 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0, S=15 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0, S=20 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0, S=32 -> Test Accuracy: 1.0
+
+The number of speakers doesn't really change anything. because we train the model and update the parameter
+for each speaker separately. less speakers means less number of trainings. As it was expected the accuracy for
+different number of speaker is like before.
+
+
+*** Changing the number of rows for each speaker
+I did another analysis based on number of rows of MFCC for each speaker. My guess was that if we don't have enough
+data for a speaker, building a good Gaussian is harder. It's like we only have limited audio files for each speaker.
+So for next part, the number of speakers are the same,
+but for each speaker only a portion of X is considered in the training process.
+
+M=8, maxIter=20, epsilon=0, S=32, portion of X=1/200 -> Test Accuracy: 0.375
+M=8, maxIter=20, epsilon=0, S=32, portion of X=1/100 -> Test Accuracy: 0.65625
+M=8, maxIter=20, epsilon=0, S=32, portion of X=1/50 -> Test Accuracy: 0.90625
+M=8, maxIter=20, epsilon=0, S=32, portion of X=1/10 -> Test Accuracy: 1.0
+M=8, maxIter=20, epsilon=0, S=32, portion of X=1(all) -> Test Accuracy: 1.0
+
+The results are exactly what I expected. with less data for each speaker, the accuracy of test is lower.
+For example, if we consider only 1/200 of all the time frames for all speakers, the accuracy is 0.375.
+The accuracy goes higher with bigger portion of X.
+So I guess a way to improve the accuracy of GMM is to increase the amount of data. Although it's not the case here.
+Here, in this problem, even 1/10 of the data that we have is enough for a perfect classifier.
+
+
+*** The question of 2.4:
+1
+To improve the classification accuracy of GMM we need to do a comprehensive hyperparameter analysis
+on train and validation set, just like other models in ML. Based on the analysis that I did in the previous part,
+it seems that the number of components in GMM is important. Usually low M doesn't result in perfect classifier.
+We need to increase it and find a perfect M that give us the highest accuracy and after that there's not much
+improvement. This discussion is also correct for the number of iterations. Usually there's not much improvement
+after a number. These two might be different for different problems and datasets.
+Another way to improve the accuracy is probably a better initialization weight. Here I took the simplest way
+suggested in the slides, but there are definitely better ways like k-means. I believe it really affect the results
+because even here I saw different results while trying different random sampling methods for mu initialization.
+With k-means, we consider more information from data in the initialization, so it probably would improve the accuracy.
+
+2
+In GMM, the classifier decide about the speakers only based on those it saw in the training. The reason is that
+it chooses based on argmax of the likelihood of the seen speakers. So even if the actual speaker is not of the trained
+speakers, and the likelihoods are low, the classifier will still choose the best among these bad options.
+So the answer is definitely one of the trained speakers.
+Maybe we can improve this part by seeing how bad the chosen top likelihoods are (with the help of a threshold for example)
+and warn user, or provide the model with more speakers, even though there is not much data available for each.
+
+3
+Speaker identification is a classification problem and like other classification problem, there are many ML
+algorithm that can help. usually neural networks achieve high accuracy with these problems. Based on what we learn
+in lectures I believe RNNs, LSTMs and GRUs are good choice that also consider the history of data in decision making
+which is important here.
+Hidden Markov Model is another method that can help here instead of GMM (based on lectures)
+
+
+
+
