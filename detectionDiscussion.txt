@@ -1,0 +1,24 @@
+*** hidden size 5
+Iteration: 7. Training Loss: 0.725. Training Accuracy: 0.276
+End of epoch 8. Validation Loss: 0.717. Validation Accuracy: 0.285
+Model test accuracy: 0.452
+
+*** hidden size 10
+Iteration: 7. Training Loss: 0.747. Training Accuracy: 0.310
+End of epoch 8. Validation Loss: 0.729. Validation Accuracy: 0.285
+Model test accuracy: 0.355
+
+*** hidden size 50
+Iteration: 7. Training Loss: 0.690. Training Accuracy: 0.724
+End of epoch 8. Validation Loss: 0.692. Validation Accuracy: 0.461
+Model test accuracy: 0.452
+
+*** hidden size 80
+Iteration: 7. Training Loss: 0.685. Training Accuracy: 0.724
+End of epoch 8. Validation Loss: 0.690. Validation Accuracy: 0.715
+Model test accuracy: 0.645
+
+*** hidden size 100
+Iteration: 7. Training Loss: 0.698. Training Accuracy: 0.276
+End of epoch 8. Validation Loss: 0.703. Validation Accuracy: 0.285
+Model test accuracy: 0.355
