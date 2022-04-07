@@ -1,0 +1,24 @@
+Since I already had an AWS account I tried Amazon's real time ASR transcription.
+In which you can start streating and talk and then it will transcribe in real-time for you.
+It was easy to work with and smart.
+
+for one word version I had:
+"pipeline"
+
+It was correctly transcribed => "pipeline"
+
+for one sentence version I had:
+"There are several steps to building this pipeline."
+
+with the 5 second, normal speed, it was transcribed as:
+"There are several steps to building this pipeline." (exactly the same)
+
+with 10 seconds, slow speed, it was transcribed as:
+"There are
+several steps to building this pipe line"
+
+with extra new line (because of my pause) and the word pipeline turning to pipe line (because I talked slowly)
+
+All in all, it seems like a smart tool, for normal talking speed.
+during my talk it sometimes went back to previous words to correct the mistakes.
+and it finally could reach the correct sentence for most of the things that I tried.
