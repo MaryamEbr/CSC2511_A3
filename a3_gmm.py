@@ -3,10 +3,8 @@ import numpy as np
 import os, fnmatch
 import random
 
-######## CHECK THIS ?????
-dataDir = '/u/cs401/A3/data/'
-# dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
 
+dataDir = '/u/cs401/A3/data/'
 class theta:
     def __init__(self, name, M=8,d=13):
         self.name = name
