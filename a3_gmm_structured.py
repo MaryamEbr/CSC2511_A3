@@ -4,17 +4,10 @@ import os, fnmatch
 import random
 from scipy.special import logsumexp
 
-################################# ??????????????????????????????????
-################################# ??????????????????????????????????
-################################# ??????????????????????????????????
-################################# ??????????????????????????????????
-################################# ??????????????????????????????????
-################################# ??????????????????????????????????
-#### ??????????????????????? ##### ^^^^^^ *********  CHANGE THIS PLS
-# np.random.seed(77)
-
-# dataDir = '/u/cs401/A3/data/'
-dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
+np.random.seed(77)
+random.seed(77)
+dataDir = '/u/cs401/A3/data/'
+# dataDir = '/Users/maryamebrahimi/Desktop/CSC2511_A3/data/'
 
 
 class theta:
@@ -197,8 +190,8 @@ def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
     i = 0
     prev_L = -np.inf
     improvement = np.inf
-    print("--------------------------------- Train ---------------------------------")
-    print("For speaker: ", myTheta.name)
+    # print("--------------------------------- Train ---------------------------------")
+    # print("For speaker: ", myTheta.name)
     while i <= maxIter and improvement >= epsilon:
         ### compute intermediate results
 
@@ -233,7 +226,7 @@ def train(speaker, X, M=8, epsilon=0.0, maxIter=20):
         prev_L = L
         i += 1
 
-        print("Iteration: ", i, "  L: ", L, "  Improvement: ", improvement)
+        # print("Iteration: ", i, "  L: ", L, "  Improvement: ", improvement)
 
     return myTheta
 
@@ -292,9 +285,9 @@ if __name__ == "__main__":
 
     trainThetas = []
     testMFCCs = []
-    print("TODO: you will need to modify this main block for Sec 2.3")
-    #### ????? why??? I didn't change anything for sec2.3 ???? did you mean 2.4 ???
-    #### Default ones
+    # print("TODO: you will need to modify this main block for Sec 2.3")
+    #### ? why??? I didn't change anything for sec2.3 ???? did you mean 2.4 ???
+
     d = 13
     k = 5  # number of top speakers to display, <= 0 if none
     M = 8
@@ -330,15 +323,15 @@ if __name__ == "__main__":
             trainThetas.append(train(speaker, X, M, epsilon, maxIter))
 
     # evaluate
-    print("--------------------------------- Test ---------------------------------")
+    # print("--------------------------------- Test ---------------------------------")
     numCorrect = 0
 
-    print("length of test ", len(testMFCCs))
+    # print("length of test ", len(testMFCCs))
 
     for i in range(0, len(testMFCCs)):
-        print("for each test  ", testMFCCs[i].shape)
+        # print("for each test  ", testMFCCs[i].shape)
         numCorrect += test(testMFCCs[i], i, trainThetas, k)
     accuracy = 1.0 * numCorrect / len(testMFCCs)
 
     # print("Train Configuration: ", "M ", M, " maxIter ", maxIter, " epsilon ", epsilon, " d ", d)
-    print("*** Test Accuracy:  ", accuracy)
+    # print("*** Test Accuracy:  ", accuracy)
