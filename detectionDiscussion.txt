@@ -1,24 +1,32 @@
-*** hidden size 5
-Iteration: 7. Training Loss: 0.725. Training Accuracy: 0.276
-End of epoch 8. Validation Loss: 0.717. Validation Accuracy: 0.285
+*** TA's recommended hyper parameters for baseline
+Last training epoch and test result are reported
+
+
+--hidden_size 5 --lr 0.02 --batch_size 52 --optimizer='adam' --epochs 6
+End of epoch 6. Validation Loss: 0.680. Validation Accuracy: 0.635
+Model test accuracy: 0.581
+
+a better result with different hyper parameters, lower batch sizes help with the test accuracy
+
+--hidden_size 5 --lr 0.01 --batch_size 32 --optimizer='adam' --epochs 6
+End of epoch 6. Validation Loss: 0.685. Validation Accuracy: 0.620
+Model test accuracy: 0.613
+
+However higher hidden size doesn't help with this problem and dataset and these hyperparameters
+
+--hidden_size 10 --lr 0.01 --batch_size 32 --optimizer='adam' --epochs 6
+End of epoch 6. Validation Loss: 0.695. Validation Accuracy: 0.395
 Model test accuracy: 0.452
 
-*** hidden size 10
-Iteration: 7. Training Loss: 0.747. Training Accuracy: 0.310
-End of epoch 8. Validation Loss: 0.729. Validation Accuracy: 0.285
+--hidden_size 50 --lr 0.01 --batch_size 32 --optimizer='adam' --epochs 6
+End of epoch 6. Validation Loss: 0.732. Validation Accuracy: 0.285
 Model test accuracy: 0.355
 
-*** hidden size 50
-Iteration: 7. Training Loss: 0.690. Training Accuracy: 0.724
-End of epoch 8. Validation Loss: 0.692. Validation Accuracy: 0.461
-Model test accuracy: 0.452
+it's probably because the model gets too complicated for this problem
+however if we continue training for more epochs the result improves. more hidden states need more training.
 
-*** hidden size 80
-Iteration: 7. Training Loss: 0.685. Training Accuracy: 0.724
-End of epoch 8. Validation Loss: 0.690. Validation Accuracy: 0.715
-Model test accuracy: 0.645
+--hidden_size 50 --lr 0.01 --batch_size 32 --optimizer='adam' --epochs 50
+End of epoch 50. Validation Loss: 0.784. Validation Accuracy: 0.459
+Model test accuracy: 0.516
 
-*** hidden size 100
-Iteration: 7. Training Loss: 0.698. Training Accuracy: 0.276
-End of epoch 8. Validation Loss: 0.703. Validation Accuracy: 0.285
-Model test accuracy: 0.355
+all in all, hidden size 5 seems the best choice for this problem.
