@@ -22,7 +22,7 @@ class LieDetector(nn.Module):
         # print("^^^ hidden size ", self.hidden_size)
         # TODO: After running the data through the GRU, perform an affine projection of the hidden space to 2D
         # TODO: space for classification (0 - truth or 1 - lie)
-        self.classifier = nn.Linear(in_features=hidden_size, out_features=2)
+        self.classifier = nn.Linear(in_features=self.hidden_size, out_features=2)
 
     def forward(self, inputs: Tensor, inputs_lengths: Tensor, hidden: Optional[Tuple[Tensor, Tensor]]=None) -> Tensor:
         """

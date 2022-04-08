@@ -1,4 +1,4 @@
-*** TA's recommended hyper parameters for baseline
+*** TA's recommended hyper parameters for baseline (piazza)
 Last training epoch and test result are reported
 
 
